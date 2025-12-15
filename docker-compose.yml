@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: blog_cms_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: blog_cms
+      MYSQL_USER: blog_user
+      MYSQL_PASSWORD: blog_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  api:
+    build: .
+    container_name: blog_cms_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=mysql+aiomysql://blog_user:blog_password@mysql:3306/blog_cms
+      - DATABASE_URL_SYNC=mysql+pymysql://blog_user:blog_password@mysql:3306/blog_cms
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - blog_network
+
+volumes:
+  mysql_data:
+
+networks:
+  blog_network:
+    driver: bridge
