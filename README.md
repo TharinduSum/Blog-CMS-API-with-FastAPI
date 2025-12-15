@@ -1,6 +1,3 @@
-# ========================================
-# 32. README.md
-# ========================================
 # Blog CMS API - FastAPI Project
 
 A professional Blog/CMS RESTful API built with FastAPI, MySQL, and SQLAlchemy (Async).
